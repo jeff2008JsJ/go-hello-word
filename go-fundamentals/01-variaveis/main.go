@@ -1,23 +1,40 @@
 package main
 
 import (
-	"os/exec"
-	"syscall"
+	"errors"
+	"log"
+	"os"
+
+	"github.com/jeff2008JsJ/go-hello-word/pkg/imc"
+	"github.com/jeff2008JsJ/go-hello-word/pkg/winui"
 )
 
 func main() {
-	// Script limpo que usa as caixas de texto nativas do Windows
-	psScript := `
-	[void][System.Reflection.Assembly]::LoadWithPartialName('Microsoft.VisualBasic')
-	$p = [Microsoft.VisualBasic.Interaction]::InputBox('Digite o seu Peso em kg (Ex: 80):', 'Peso')
-	if ($p -eq '') { exit }
-	$a = [Microsoft.VisualBasic.Interaction]::InputBox('Digite a sua Altura em metros (Ex: 1.75):', 'Altura')
-	if ($a -eq '') { exit }
-	$imc = [double]$p / ([double]$a * [double]$a)
-	$imcF = '{0:N2}' -f $imc
-	[System.Windows.Forms.MessageBox]::Show('Seu IMC é: ' + $imcF, 'Resultado')
-	`
-	cmd := exec.Command("powershell", "-Command", psScript)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	cmd.Run()
+	peso, err := winui.PerguntarFloat("Digite o seu Peso em kg (Ex: 80):", "Peso")
+	if err != nil {
+		encerrar(err)
+	}
+	altura, err := winui.PerguntarFloat("Digite a sua Altura em metros (Ex: 1.75):", "Altura")
+	if err != nil {
+		encerrar(err)
+	}
+
+	resumo, err := imc.Resumo(peso, altura)
+	if err != nil {
+		if err := winui.MessageBox(err.Error(), "Resultado"); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
+	if err := winui.MessageBox(resumo, "Resultado"); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func encerrar(err error) {
+	if errors.Is(err, winui.ErrCancelado) {
+		os.Exit(0)
+	}
+	log.Fatal(err)
 }
