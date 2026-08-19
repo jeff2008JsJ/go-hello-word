@@ -1,31 +1,38 @@
 package main
 
 import (
-"fmt"
-"fyne.io/fyne/v2/app"
-"fyne.io/fyne/v2/container"
-"fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+
+	"meuapp/imc"
 )
 
 func main() {
-meuApp := app.New()
-minhaJanela := meuApp.NewWindow("Calculadora de IMC")
+	meuApp := app.New()
+	minhaJanela := meuApp.NewWindow("Calculadora de IMC")
 
-titulo := widget.NewLabel("-- Exemplo de classificação do IMC --")
-infoPeso := widget.NewLabel("Peso: 100.00 kg")
-infoAltura := widget.NewLabel("Altura: 1.75 m")
-resultadoIMC := widget.NewLabel("IMC: --")
-resultadoClassif := widget.NewLabel("Classificação: --")
+	const peso = 100.00
+	const altura = 1.75
 
-botaoCalcular := widget.NewButton("Calcular IMC", func() {
-peso := 100.00
-altura := 1.75
-imc := peso / (altura * altura)
-resultadoIMC.SetText(fmt.Sprintf("IMC: %.2f", imc))
-resultadoClassif.SetText("Classificação: Obesidade grau I")
-})
+	titulo := widget.NewLabel("-- Exemplo de classificação do IMC --")
+	infoPeso := widget.NewLabel("Peso: " + imc.Formatar(peso) + " kg")
+	infoAltura := widget.NewLabel("Altura: 1.75 m")
+	resultadoIMC := widget.NewLabel("IMC: --")
+	resultadoClassif := widget.NewLabel("Classificação: --")
 
-conteudo := container.NewVBox(titulo, infoPeso, infoAltura, botaoCalcular, resultadoIMC, resultadoClassif)
-minhaJanela.SetContent(conteudo)
-minhaJanela.ShowAndRun()
+	botaoCalcular := widget.NewButton("Calcular IMC", func() {
+		valor, err := imc.Calcular(peso, altura)
+		if err != nil {
+			resultadoIMC.SetText("IMC: --")
+			resultadoClassif.SetText("Classificação: " + err.Error())
+			return
+		}
+		resultadoIMC.SetText("IMC: " + imc.Formatar(valor))
+		resultadoClassif.SetText("Classificação: " + imc.Classificar(valor))
+	})
+
+	conteudo := container.NewVBox(titulo, infoPeso, infoAltura, botaoCalcular, resultadoIMC, resultadoClassif)
+	minhaJanela.SetContent(conteudo)
+	minhaJanela.ShowAndRun()
 }

@@ -1,5 +1,9 @@
 package main
 
+func saudacao() string {
+	return "Hello, World!"
+}
+
 func main() {
-	println("Hello, World!")
+	println(saudacao())
 }
