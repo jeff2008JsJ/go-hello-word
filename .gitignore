@@ -1,0 +1,13 @@
+# Compiled binaries and build output
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go workspace / env
+go.work
+go.work.sum
+.env
